@@ -1,0 +1,93 @@
+.post-form {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .post-form h3 {
+    margin-top: 30px;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .post-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .post-form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    color: #555;
+  }
+  
+  /* For the Pitch Report parent */
+  .post-form .pitch-report label {
+    font-size: 1.2rem;
+    color: #333; /* Neutral gray or change to #000 for black */
+    margin-bottom: 15px;
+  }
+  
+  .post-form textarea,
+  .post-form input {
+    width: 90%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+    background-color: #fdfdfd;
+
+  } 
+  
+
+  .post-form textarea:focus,
+  .post-form input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Child fields under Pitch Report */
+  .form-group-child {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    width: 80%; /* Reduce width of child fields */
+  }
+  
+  .form-group-child input,
+  .form-group-child textarea {
+    width: 95%; /* Further reduce the size of input elements for child fields */
+    margin-right: 20px; /* Add right margin to reduce the width from the right */
+  }
+  
+  .form-group-child label {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  /* Styling for the submit button */
+  .post-form button {
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .post-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .post-form button:focus {
+    outline: none;
+  }
+  
