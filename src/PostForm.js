@@ -333,6 +333,16 @@ const PostForm = ({ matchId, teamA, teamB }) => {
           rows="4"
         />
       </div>
+
+      <div className="form-group">
+        <label>Match Preview:</label>
+        <textarea
+          value={preview}
+          onChange={(e) => setPreview(e.target.value)}
+          placeholder="Enter Preview"
+          rows="4"
+        />
+      </div>
       {/* <div className="form-group"> */}
       <hr style={{ margin: "50px 0px" }}></hr>
       {/* </div> */}
