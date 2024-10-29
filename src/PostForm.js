@@ -104,6 +104,66 @@ const PostForm = ({ matchId, teamA, teamB }) => {
         .catch((error) => console.error("Error fetching squads:", error));
     }
   }, [matchId]);
+
+
+  // Fetch existing data if matchId exists
+  useEffect(() => {
+    if (matchId) {
+      axios
+        .get(`https://hammerhead-app-jkdit.ondigitalocean.app/api/getMatchData/${matchId}`)
+        .then((response) => {
+          const data = response.data;
+  
+          // Populate the form fields with the fetched data
+          setTitle(data.title || "");
+          setSummary(data.summary || "");
+          setPreview(data.preview || "");
+          setPitch(data.pitch || "");
+          setRecords(data.records || "");
+          setWinningPercentage(data.winning_percentage || "");
+          setPitchBehaviour(data.pitch_behaviour || "");
+          setAvgInningScore(data.avg_inning_score || "");
+          setBestSuitedTo(data.best_suited_to || "");
+  
+          // Populate captain and vice-captain choices
+          setCaptainChoice(data.captain_choice ? { label: data.captain_choice, value: data.captain_choice } : null);
+          setViceCaptainChoice(data.vice_captain_choice ? { label: data.vice_captain_choice, value: data.vice_captain_choice } : null);
+  
+          // Populate hot picks and expert advice
+          setCaptaincyPicks(data.hot_picks.captaincyPicks.map(pick => ({ label: pick, value: pick })));
+          setTopPicks(data.hot_picks.topPicks.map(pick => ({ label: pick, value: pick })));
+          setBudgetPicks(data.hot_picks.budgetPicks.map(pick => ({ label: pick, value: pick })));
+          setSlCaptaincyChoice(data.expert_advice.slCaptaincyChoice.map(choice => ({ label: choice, value: choice })));
+          setGlCaptaincyChoice(data.expert_advice.glCaptaincyChoice.map(choice => ({ label: choice, value: choice })));
+          setPuntPicks(data.expert_advice.puntPicks.map(pick => ({ label: pick, value: pick })));
+          setDream11Combination(data.expert_advice.dream11Combination || "");
+  
+          // Populate playing 11 for teams A and B
+          setPlaying11A(data.playing11_teamA ? data.playing11_teamA.batsmen.concat(data.playing11_teamA.bowlers, data.playing11_teamA.keepers, data.playing11_teamA.allrounders).map(player => ({
+            label: player.label,
+            value: player.value,
+            role: player.role
+          })) : []);
+  
+          setPlaying11B(data.playing11_teamB ? data.playing11_teamB.batsmen.concat(data.playing11_teamB.bowlers, data.playing11_teamB.keepers, data.playing11_teamB.allrounders).map(player => ({
+            label: player.label,
+            value: player.value,
+            role: player.role
+          })) : []);
+  
+          // Populate teams
+          setTeams(data.teams.map(team => ({
+            teamName: team.teamName,
+            keepers: team.keepers.map(player => ({ label: player.label, value: player.value, role: player.role })),
+            batsmen: team.batsmen.map(player => ({ label: player.label, value: player.value, role: player.role })),
+            allrounders: team.allrounders.map(player => ({ label: player.label, value: player.value, role: player.role })),
+            bowlers: team.bowlers.map(player => ({ label: player.label, value: player.value, role: player.role }))
+          })));
+        })
+        .catch((error) => console.error("Error fetching match data:", error));
+    }
+  }, [matchId]);
+
   
   
 
@@ -152,6 +212,9 @@ const PostForm = ({ matchId, teamA, teamB }) => {
       }
     }
   };
+
+
+  
 
   // const addTeam = () => {
   //   setTeams([...teams, currentTeam]); // Add current team to teams list
@@ -242,7 +305,7 @@ const PostForm = ({ matchId, teamA, teamB }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const postData = {
       matchId,
@@ -259,30 +322,24 @@ const PostForm = ({ matchId, teamA, teamB }) => {
           bestSuitedTo,
         },
       },
-      teams, // The created teams with selected players
-
-      playing11TeamA: {
-        keepers: keepersA.map((player) => player.label),
-        batsmen: batsmenA.map((player) => player.label),
-        allrounders: allroundersA.map((player) => player.label),
-        bowlers: bowlersA.map((player) => player.label),
-      },
-      playing11TeamB: {
-        keepers: keepersB.map((player) => player.label),
-        batsmen: batsmenB.map((player) => player.label),
-        allrounders: allroundersB.map((player) => player.label),
-        bowlers: bowlersB.map((player) => player.label),
-      },
+      teams,
+      playing11TeamA: playing11A.map((player) => ({
+        playerId: player.value,
+        name: player.label,
+        role: player.role,
+      })),
+      playing11TeamB: playing11B.map((player) => ({
+        playerId: player.value,
+        name: player.label,
+        role: player.role,
+      })),
       hotPicks: {
         captaincyPicks: captaincyPicks.map((player) => player.label),
         topPicks: topPicks.map((player) => player.label),
         budgetPicks: budgetPicks.map((player) => player.label),
-        // captainViceCaptainPicks: captainViceCaptainPicks.map(
-        //   (player) => player.label
-        // ),
       },
-      captainChoice: captainChoice?.label || null, // Send Captain Choice
-      viceCaptainChoice: viceCaptainChoice?.label || null, // Send Vice-Ca
+      captainChoice: captainChoice?.label || null,
+      viceCaptainChoice: viceCaptainChoice?.label || null,
       expertAdvice: {
         slCaptaincyChoice: slCaptaincyChoice.map((player) => player.label),
         glCaptaincyChoice: glCaptaincyChoice.map((player) => player.label),
@@ -290,8 +347,18 @@ const PostForm = ({ matchId, teamA, teamB }) => {
         dream11Combination,
       },
     };
-    console.log(postData); // Here you would send the data to your backend
+  
+    try {
+      const response = matchId
+        ? await axios.put(`https://hammerhead-app-jkdit.ondigitalocean.app/api/updateMatch/${matchId}`, postData)
+        : await axios.post("https://hammerhead-app-jkdit.ondigitalocean.app/api/saveForm", postData);
+      console.log("Form submitted successfully:", response.data);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
+  
+
   const handlePlaying11Select = (team, selectedPlayers) => {
     if (team === "A") {
       setPlaying11A(selectedPlayers);
