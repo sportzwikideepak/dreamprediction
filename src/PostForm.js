@@ -56,47 +56,49 @@ const PostForm = ({ matchId, teamA, teamB }) => {
         )
         .then((response) => {
           console.log("API Response:", response.data);
-  
+
           // Extract squads and players data from the response
           const playersData = response.data.response.players;
           const squadAData = response.data.response.teama.squads;
           const squadBData = response.data.response.teamb.squads;
-  
+
           console.log("Players Data:", playersData);
           console.log("Squad A Data:", squadAData);
           console.log("Squad B Data:", squadBData);
-  
+
           // Function to map squad players with their ratings
           const mapPlayerData = (squad, players) => {
             return squad.map((squadPlayer) => {
               // Convert player_id to a number for matching
               const playerId = Number(squadPlayer.player_id);
-  
+
               // Find the player details by matching player_id with pid
               const playerDetails = players.find(
                 (player) => player.pid === playerId
               );
-  
+
               console.log("Squad Player ID:", squadPlayer.player_id);
               console.log("Matched Player Details:", playerDetails);
-  
+
               // If player details are found, include fantasy_player_rating and role
               return {
                 value: squadPlayer.player_id,
-                label: `${squadPlayer.name} - ${playerDetails?.fantasy_player_rating || 'N/A'} (${squadPlayer.role})`,
-                rating: playerDetails?.fantasy_player_rating || 'N/A',
+                label: `${squadPlayer.name} - ${
+                  playerDetails?.fantasy_player_rating || "N/A"
+                } (${squadPlayer.role})`,
+                rating: playerDetails?.fantasy_player_rating || "N/A",
                 role: squadPlayer.role,
               };
             });
           };
-  
+
           // Map data for team A and team B
           const teamAPlayers = mapPlayerData(squadAData, playersData);
           const teamBPlayers = mapPlayerData(squadBData, playersData);
-  
+
           console.log("Mapped Team A Players:", teamAPlayers);
           console.log("Mapped Team B Players:", teamBPlayers);
-  
+
           // Set the squads for both teams
           setSquadA(teamAPlayers);
           setSquadB(teamBPlayers);
@@ -105,15 +107,16 @@ const PostForm = ({ matchId, teamA, teamB }) => {
     }
   }, [matchId]);
 
-
   // Fetch existing data if matchId exists
   useEffect(() => {
     if (matchId) {
       axios
-        .get(`https://hammerhead-app-jkdit.ondigitalocean.app/api/getMatchData/${matchId}`)
+        .get(
+          `https://hammerhead-app-jkdit.ondigitalocean.app/api/getMatchData/${matchId}`
+        )
         .then((response) => {
           const data = response.data;
-  
+
           // Populate the form fields with the fetched data
           setTitle(data.title || "");
           setSummary(data.summary || "");
@@ -124,48 +127,112 @@ const PostForm = ({ matchId, teamA, teamB }) => {
           setPitchBehaviour(data.pitch_behaviour || "");
           setAvgInningScore(data.avg_inning_score || "");
           setBestSuitedTo(data.best_suited_to || "");
-  
+
           // Populate captain and vice-captain choices
-          setCaptainChoice(data.captain_choice ? { label: data.captain_choice, value: data.captain_choice } : null);
-          setViceCaptainChoice(data.vice_captain_choice ? { label: data.vice_captain_choice, value: data.vice_captain_choice } : null);
-  
+          setCaptainChoice(
+            data.captain_choice
+              ? { label: data.captain_choice, value: data.captain_choice }
+              : null
+          );
+          setViceCaptainChoice(
+            data.vice_captain_choice
+              ? {
+                  label: data.vice_captain_choice,
+                  value: data.vice_captain_choice,
+                }
+              : null
+          );
+
           // Populate hot picks and expert advice
-          setCaptaincyPicks(data.hot_picks.captaincyPicks.map(pick => ({ label: pick, value: pick })));
-          setTopPicks(data.hot_picks.topPicks.map(pick => ({ label: pick, value: pick })));
-          setBudgetPicks(data.hot_picks.budgetPicks.map(pick => ({ label: pick, value: pick })));
-          setSlCaptaincyChoice(data.expert_advice.slCaptaincyChoice.map(choice => ({ label: choice, value: choice })));
-          setGlCaptaincyChoice(data.expert_advice.glCaptaincyChoice.map(choice => ({ label: choice, value: choice })));
-          setPuntPicks(data.expert_advice.puntPicks.map(pick => ({ label: pick, value: pick })));
+          setCaptaincyPicks(
+            data.hot_picks.captaincyPicks.map((pick) => ({
+              label: pick,
+              value: pick,
+            }))
+          );
+          setTopPicks(
+            data.hot_picks.topPicks.map((pick) => ({
+              label: pick,
+              value: pick,
+            }))
+          );
+          setBudgetPicks(
+            data.hot_picks.budgetPicks.map((pick) => ({
+              label: pick,
+              value: pick,
+            }))
+          );
+          setSlCaptaincyChoice(
+            data.expert_advice.slCaptaincyChoice.map((choice) => ({
+              label: choice,
+              value: choice,
+            }))
+          );
+          setGlCaptaincyChoice(
+            data.expert_advice.glCaptaincyChoice.map((choice) => ({
+              label: choice,
+              value: choice,
+            }))
+          );
+          setPuntPicks(
+            data.expert_advice.puntPicks.map((pick) => ({
+              label: pick,
+              value: pick,
+            }))
+          );
           setDream11Combination(data.expert_advice.dream11Combination || "");
-  
-          // Populate playing 11 for teams A and B
-          setPlaying11A(data.playing11_teamA ? data.playing11_teamA.batsmen.concat(data.playing11_teamA.bowlers, data.playing11_teamA.keepers, data.playing11_teamA.allrounders).map(player => ({
-            label: player.label,
-            value: player.value,
-            role: player.role
-          })) : []);
-  
-          setPlaying11B(data.playing11_teamB ? data.playing11_teamB.batsmen.concat(data.playing11_teamB.bowlers, data.playing11_teamB.keepers, data.playing11_teamB.allrounders).map(player => ({
-            label: player.label,
-            value: player.value,
-            role: player.role
-          })) : []);
-  
+
+          setTeams(
+            data.teams.map((team) => ({
+              teamName: team.teamName,
+              keepers: team.keepers.map((player) => ({
+                label: player.label,
+                value: player.value,
+                role: player.role,
+              })),
+              batsmen: team.batsmen.map((player) => ({
+                label: player.label,
+                value: player.value,
+                role: player.role,
+              })),
+              allrounders: team.allrounders.map((player) => ({
+                label: player.label,
+                value: player.value,
+                role: player.role,
+              })),
+              bowlers: team.bowlers.map((player) => ({
+                label: player.label,
+                value: player.value,
+                role: player.role,
+              })),
+            }))
+          );
+
+          setPlaying11A(
+            data.playing11_teamA
+              ? data.playing11_teamA.map((player) => ({
+                  label: player.name,
+                  value: player.playerId,
+                  role: player.role,
+                }))
+              : []
+          );
+
+          setPlaying11B(
+            data.playing11_teamB
+              ? data.playing11_teamB.map((player) => ({
+                  label: player.name,
+                  value: player.playerId,
+                  role: player.role,
+                }))
+              : []
+          );
+
           // Populate teams
-          setTeams(data.teams.map(team => ({
-            teamName: team.teamName,
-            keepers: team.keepers.map(player => ({ label: player.label, value: player.value, role: player.role })),
-            batsmen: team.batsmen.map(player => ({ label: player.label, value: player.value, role: player.role })),
-            allrounders: team.allrounders.map(player => ({ label: player.label, value: player.value, role: player.role })),
-            bowlers: team.bowlers.map(player => ({ label: player.label, value: player.value, role: player.role }))
-          })));
         })
         .catch((error) => console.error("Error fetching match data:", error));
     }
   }, [matchId]);
-
-  
-  
 
   // Pre-fill title when team names are available
   useEffect(() => {
@@ -213,9 +280,6 @@ const PostForm = ({ matchId, teamA, teamB }) => {
     }
   };
 
-
-  
-
   // const addTeam = () => {
   //   setTeams([...teams, currentTeam]); // Add current team to teams list
   //   setCurrentTeam({
@@ -228,44 +292,43 @@ const PostForm = ({ matchId, teamA, teamB }) => {
   //   setShowTeamForm(false); // Close the form
   // };
 
-
   const addTeam = () => {
     const selectedPlayers = [
       ...currentTeam.keepers,
       ...currentTeam.batsmen,
       ...currentTeam.allrounders,
-      ...currentTeam.bowlers
+      ...currentTeam.bowlers,
     ];
-  
+
     // Check if the total selected players are 11
     if (selectedPlayers.length !== 11) {
       alert("Please select exactly 11 players to create a team.");
       return;
     }
-  
+
     // Calculate the total fantasy player rating
     const totalRating = selectedPlayers.reduce((acc, player) => {
       return acc + player.rating;
     }, 0);
-  
+
     // Check if the total rating exceeds 100
     if (totalRating > 100) {
       alert("Fantasy player rating exceeds 100. You cannot create this team.");
       return;
     }
-  
+
     // Proceed with adding the team if conditions are met
     setTeams([...teams, currentTeam]);
-  
+
     // Reset the current team form after adding
     setCurrentTeam({
       teamName: "",
       keepers: [],
       batsmen: [],
       allrounders: [],
-      bowlers: []
+      bowlers: [],
     });
-  
+
     setShowTeamForm(false); // Close the form
   };
   // Handle player selection for Hot Picks categories
@@ -347,17 +410,27 @@ const PostForm = ({ matchId, teamA, teamB }) => {
         dream11Combination,
       },
     };
-  
+
     try {
-      const response = matchId
-        ? await axios.put(`https://hammerhead-app-jkdit.ondigitalocean.app/api/updateMatch/${matchId}`, postData)
-        : await axios.post("https://hammerhead-app-jkdit.ondigitalocean.app/api/saveForm", postData);
-      console.log("Form submitted successfully:", response.data);
-    } catch (error) {
+      // Call the API to save (insert or update) the form data
+      const response = await axios.post(
+        "https://hammerhead-app-jkdit.ondigitalocean.app/api/saveForm1",
+        postData
+      );
+      // Show success message based on the response status
+    if (response.status === 201) {
+      alert("Form data inserted successfully!");
+    } else if (response.status === 200) {
+      alert("Form data updated successfully!");
+    }
+    
+    console.log("Form submitted successfully:", response.data);
+  } 
+      
+      catch (error) {
       console.error("Error submitting form:", error);
     }
   };
-  
 
   const handlePlaying11Select = (team, selectedPlayers) => {
     if (team === "A") {
@@ -653,8 +726,9 @@ const PostForm = ({ matchId, teamA, teamB }) => {
             <Select
               isMulti
               // options={[...squadA, ...squadB]}
-              options={squadA.concat(squadB).filter(player => player.role === "wk")} // Filter for wicketkeepers
-
+              options={squadA
+                .concat(squadB)
+                .filter((player) => player.role === "wk")} // Filter for wicketkeepers
               value={currentTeam.keepers}
               onChange={(selected) => handleTeamFormChange("keepers", selected)}
               placeholder="Select Keepers"
@@ -669,8 +743,9 @@ const PostForm = ({ matchId, teamA, teamB }) => {
             <Select
               isMulti
               // options={[...squadA, ...squadB]}
-              options={squadA.concat(squadB).filter(player => player.role === "bat")} // Filter for batsmen
-
+              options={squadA
+                .concat(squadB)
+                .filter((player) => player.role === "bat")} // Filter for batsmen
               value={currentTeam.batsmen}
               onChange={(selected) => handleTeamFormChange("batsmen", selected)}
               placeholder="Select Batsmen"
@@ -685,8 +760,9 @@ const PostForm = ({ matchId, teamA, teamB }) => {
             <Select
               isMulti
               // options={[...squadA, ...squadB]}
-              options={squadA.concat(squadB).filter(player => player.role === "all")} // Filter for all-rounders
-
+              options={squadA
+                .concat(squadB)
+                .filter((player) => player.role === "all")} // Filter for all-rounders
               value={currentTeam.allrounders}
               onChange={(selected) =>
                 handleTeamFormChange("allrounders", selected)
@@ -703,8 +779,9 @@ const PostForm = ({ matchId, teamA, teamB }) => {
             <Select
               isMulti
               // options={[...squadA, ...squadB]}
-              options={squadA.concat(squadB).filter(player => player.role === "bowl")} // Filter for bowlers
-
+              options={squadA
+                .concat(squadB)
+                .filter((player) => player.role === "bowl")} // Filter for bowlers
               value={currentTeam.bowlers}
               onChange={(selected) => handleTeamFormChange("bowlers", selected)}
               placeholder="Select Bowlers"
@@ -757,7 +834,6 @@ const PostForm = ({ matchId, teamA, teamB }) => {
         />
         <p>Select up to 11 players</p>
       </div>
-
       <hr style={{ margin: "50px 0px" }}></hr>
 
       <button type="submit">Submit</button>
